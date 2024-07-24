@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "SimpleFOC Build",
+            "command": "make",
+            "args": [
+                "DEBUG=1",
+                "-j3",
+                "all",
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Flash program",
+            "command": "openocd -f ./openocd.cfg -c \"flash_elf build/Nucleo-SimpleFOC.elf\"",
+            "problemMatcher": [],
+            "group": "none",
+        }
+    ]
+}
