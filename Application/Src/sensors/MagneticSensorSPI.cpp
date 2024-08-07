@@ -64,6 +64,7 @@ void MagneticSensorSPI::init(SPI_HandleTypeDef *_spi)
 //  angle is in radians [rad]
 float MagneticSensorSPI::getSensorAngle()
 {
+    cpr = 16384.0f;
     return (getRawCount() / (float)cpr) * _2PI;
 }
 
@@ -121,10 +122,11 @@ uint16_t MagneticSensorSPI::read(uint16_t angle_register)
     HAL_SPI_TransmitReceive(spi, command_8bit, register_value_8bit, 2, 1);
     Write_GPIO(chip_select_pin, GPIO_PIN_SET);
 
-    register_value = (static_cast<uint16_t>(register_value_8bit[1]) << 8) | static_cast<uint16_t>(register_value_8bit[0]);
+    register_value = (static_cast<uint16_t>(register_value_8bit[0]) << 8) | static_cast<uint16_t>(register_value_8bit[1]);
     register_value = register_value >> (1 + data_start_bit - bit_resolution); // this should shift data to the rightmost bits of the uint16_t
 
-    const static uint16_t data_mask = 0xFFFF >> (16 - bit_resolution);
+    // const static uint16_t data_mask = 0xFFFF >> (16 - bit_resolution);
+    const static uint16_t data_mask = 0x3FFF;
 
     return register_value & data_mask; // Return the data, stripping the non data (e.g parity) bits
 }

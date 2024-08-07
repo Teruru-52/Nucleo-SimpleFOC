@@ -66,10 +66,12 @@ int BLDCMotor::init()
   {
     motor_status = FOCMotorStatus::motor_init_failed;
     // SIMPLEFOC_DEBUG("MOT: Init not possible, driver not initialized");
+    printf("MOT: Init not possible, driver not initialized\n");
     return 0;
   }
   motor_status = FOCMotorStatus::motor_initializing;
   // SIMPLEFOC_DEBUG("MOT: Init");
+  printf("MOT: Init\n");
 
   // sanity check for the voltage limit configuration
   if (voltage_limit > driver->voltage_limit)
@@ -106,6 +108,7 @@ int BLDCMotor::init()
   _delay(500);
   // enable motor
   // SIMPLEFOC_DEBUG("MOT: Enable driver.");
+  printf("MOT: Enable driver.\n");
   enable();
   _delay(500);
   motor_status = FOCMotorStatus::motor_uncalibrated;
@@ -176,6 +179,7 @@ int BLDCMotor::initFOC()
         {
           motor_status = FOCMotorStatus::motor_calib_failed;
           // SIMPLEFOC_DEBUG("MOT: Init FOC error, current sense not initialized");
+          printf("MOT: Init FOC error, current sense not initialized\n");
           exit_flag = 0;
         }
         else
@@ -186,16 +190,19 @@ int BLDCMotor::initFOC()
       else
       {
         // SIMPLEFOC_DEBUG("MOT: No current sense.");
+        printf("MOT: No current sense.\n");
       }
     }
   }
   else
   {
     // SIMPLEFOC_DEBUG("MOT: No sensor.");
+    printf("MOT: No sensor.\n");
     if ((controller == MotionControlType::angle_openloop || controller == MotionControlType::velocity_openloop))
     {
       exit_flag = 1;
       // SIMPLEFOC_DEBUG("MOT: Openloop only!");
+      printf("MOT: Openloop only!\n");
     }
     else
     {
@@ -206,11 +213,13 @@ int BLDCMotor::initFOC()
   if (exit_flag)
   {
     // SIMPLEFOC_DEBUG("MOT: Ready.");
+    printf("MOT: Ready.\n");
     motor_status = FOCMotorStatus::motor_ready;
   }
   else
   {
     // SIMPLEFOC_DEBUG("MOT: Init FOC failed.");
+    printf("MOT: Init FOC failed.\n");
     motor_status = FOCMotorStatus::motor_calib_failed;
     disable();
   }
@@ -224,19 +233,22 @@ int BLDCMotor::alignCurrentSense()
   int exit_flag = 1; // success
 
   // SIMPLEFOC_DEBUG("MOT: Align current sense.");
+  printf("MOT: Align current sense.\n");
 
   // align current sense and the driver
-  exit_flag = current_sense->driverAlign(voltage_sensor_align, modulation_centered);
+  // exit_flag = current_sense->driverAlign(voltage_sensor_align, modulation_centered);
   if (!exit_flag)
   {
     // error in current sense - phase either not measured or bad connection
     // SIMPLEFOC_DEBUG("MOT: Align error!");
+    printf("MOT: Align error!\n");
     exit_flag = 0;
   }
   else
   {
     // output the alignment status flag
     // SIMPLEFOC_DEBUG("MOT: Success: ", exit_flag);
+    printf("MOT: Success: %d\n", exit_flag);
   }
 
   return exit_flag > 0;
@@ -247,6 +259,7 @@ int BLDCMotor::alignSensor()
 {
   int exit_flag = 1; // success
   // SIMPLEFOC_DEBUG("MOT: Align sensor.");
+  printf("MOT: Align sensor.\n");
 
   // check if sensor needs zero search
   if (sensor->needsSearch())
@@ -292,16 +305,19 @@ int BLDCMotor::alignSensor()
     if (moved < MIN_ANGLE_DETECT_MOVEMENT)
     { // minimum angle to detect movement
       // SIMPLEFOC_DEBUG("MOT: Failed to notice movement");
+      printf("MOT: Failed to notice movement\n");
       return 0; // failed calibration
     }
     else if (mid_angle < end_angle)
     {
       // SIMPLEFOC_DEBUG("MOT: sensor_direction==CCW");
+      printf("MOT: sensor_direction==CCW\n");
       sensor_direction = Direction::CCW;
     }
     else
     {
       // SIMPLEFOC_DEBUG("MOT: sensor_direction==CW");
+      printf("MOT: sensor_direction==CW\n");
       sensor_direction = Direction::CW;
     }
     // check pole pair number
@@ -309,15 +325,18 @@ int BLDCMotor::alignSensor()
     if (pp_check_result == false)
     {
       // SIMPLEFOC_DEBUG("MOT: PP check: fail - estimated pp: ", _2PI / moved);
+      printf("MOT: PP check: fail - estimated pp: %f\n", _2PI / moved);
     }
     else
     {
       // SIMPLEFOC_DEBUG("MOT: PP check: OK!");
+      printf("MOT: PP check: OK!\n");
     }
   }
   else
   {
     // SIMPLEFOC_DEBUG("MOT: Skip dir calib.");
+    printf("MOT: Skip dir calib.\n");
   }
 
   // zero electric angle not known
@@ -337,6 +356,7 @@ int BLDCMotor::alignSensor()
     // if (monitor_port)
     // {
     //   SIMPLEFOC_DEBUG("MOT: Zero elec. angle: ", zero_electric_angle);
+    printf("MOT: Zero elec. angle: %f\n", zero_electric_angle);
     // }
     // stop everything
     setPhaseVoltage(0, 0, 0);
@@ -345,6 +365,7 @@ int BLDCMotor::alignSensor()
   else
   {
     // SIMPLEFOC_DEBUG("MOT: Skip offset calib.");
+    printf("MOT: Skip offset calib.\n");
   }
   return exit_flag;
 }
@@ -356,6 +377,7 @@ int BLDCMotor::absoluteZeroSearch()
   // sensor precision: this is all ok, as the search happens near the 0-angle, where the precision
   //                    of float is sufficient.
   // SIMPLEFOC_DEBUG("MOT: Index search...");
+  printf("MOT: Index search...\n");
   // search the absolute zero with small velocity
   float limit_vel = velocity_limit;
   float limit_volt = voltage_limit;
@@ -377,14 +399,16 @@ int BLDCMotor::absoluteZeroSearch()
   // check if the zero found
   // if (monitor_port)
   // {
-  //   if (sensor->needsSearch())
-  //   {
-  //     SIMPLEFOC_DEBUG("MOT: Error: Not found!");
-  //   }
-  //   else
-  //   {
-  //     SIMPLEFOC_DEBUG("MOT: Success!");
-  //   }
+  if (sensor->needsSearch())
+  {
+    // SIMPLEFOC_DEBUG("MOT: Error: Not found!");
+    printf("MOT: Error: Not found!\n");
+  }
+  else
+  {
+    // SIMPLEFOC_DEBUG("MOT: Success!");
+    printf("MOT: Success!\n");
+  }
   // }
   return !sensor->needsSearch();
 }
@@ -400,11 +424,16 @@ void BLDCMotor::loopFOC()
 
   // if open-loop do nothing
   if (controller == MotionControlType::angle_openloop || controller == MotionControlType::velocity_openloop)
+  {
     return;
+  }
 
   // if disabled do nothing
   if (!enabled)
+  {
+    Write_GPIO(LED_LD3, GPIO_PIN_SET);
     return;
+  }
 
   // Needs the update() to be called first
   // This function will not have numerical issues because it uses Sensor::getMechanicalAngle()
@@ -447,6 +476,8 @@ void BLDCMotor::loopFOC()
   default:
     // no torque control selected
     // SIMPLEFOC_DEBUG("MOT: no torque control selected!");
+    printf("MOT: no torque control selected!\n");
+    Write_GPIO(LED_LD3, GPIO_PIN_SET);
     break;
   }
 
@@ -712,6 +743,7 @@ void BLDCMotor::setPhaseVoltage(float Uq, float Ud, float angle_el)
 
   // set the voltages in driver
   driver->setPwm(Ua, Ub, Uc);
+  // printf("Ua: %.3f, Ub: %.3f, Uc: %.3f\n", Ua, Ub, Uc);
 }
 
 // Function (iterative) generating open loop movement for target velocity

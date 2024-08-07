@@ -34,14 +34,14 @@ extern "C" {
 
 extern TIM_HandleTypeDef htim1;
 
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN Private defines */
-#define TIM3_COUNTER_PERIOD 2999.0
+#define TIM2_COUNTER_PERIOD 3599.0
 /* USER CODE END Private defines */
 
 void MX_TIM1_Init(void);
-void MX_TIM3_Init(void);
+void MX_TIM2_Init(void);
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 

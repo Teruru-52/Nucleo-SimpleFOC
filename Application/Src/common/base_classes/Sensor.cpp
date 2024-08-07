@@ -13,13 +13,15 @@ void Sensor::update()
     if (abs(d_angle) > (0.8f * _2PI))
         full_rotations += (d_angle > 0) ? -1 : 1;
     angle_prev = val;
+    // printf("angle_val: %.3f\n", val);
 }
 
 /** get current angular velocity (rad/s) */
 float Sensor::getVelocity()
 {
     // calculate sample time
-    float Ts = (angle_prev_ts - vel_angle_prev_ts) * 1e-6f;
+    // float Ts = (angle_prev_ts - vel_angle_prev_ts) * 1e-6f;
+    float Ts = 0.001;
     if (Ts < 0.0f)
     { // handle micros() overflow - we need to reset vel_angle_prev_ts
         vel_angle_prev = angle_prev;
@@ -49,6 +51,10 @@ void Sensor::init()
     _delay(1);
     angle_prev = getSensorAngle(); // call again
     angle_prev_ts = _micros();
+    printf("vel_angle_prev: %.3f\n", vel_angle_prev);
+    printf("vel_angle_prev_ts: %ld\n", vel_angle_prev_ts);
+    printf("angle_prev: %.3f\n", angle_prev);
+    printf("angle_prev_ts: %ld\n", angle_prev_ts);
 }
 
 float Sensor::getMechanicalAngle()

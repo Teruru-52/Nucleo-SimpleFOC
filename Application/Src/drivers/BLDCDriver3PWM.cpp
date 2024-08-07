@@ -44,6 +44,7 @@ int BLDCDriver3PWM::init()
   // Set the pwm frequency to the pins
   // hardware specific function - depending on driver and mcu
   _configure3PWM();
+  printf("MOT: Initialize timer\n");
   initialized = true;
   return 1;
 }
@@ -74,4 +75,5 @@ void BLDCDriver3PWM::setPwm(float Ua, float Ub, float Uc)
   // hardware specific writing
   // hardware specific function - depending on driver and mcu
   _writeDutyCycle3PWM(dc_a, dc_b, dc_c);
+  // printf("dc_a: %.3f, dc_b: %.3f, dc_c: %.3f\n", dc_a, dc_b, dc_c);
 }

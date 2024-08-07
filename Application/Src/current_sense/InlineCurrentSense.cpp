@@ -73,6 +73,7 @@ void InlineCurrentSense::calibrateOffsets()
     offset_ib = offset_ib / calibration_rounds;
     if (_isset(pinC))
         offset_ic = offset_ic / calibration_rounds;
+    printf("Current sensor offsets: %.3f, %.3f, %.3f\n", offset_ia, offset_ib, offset_ic);
 }
 
 // read all three phase currents (if possible 2 or 3)
@@ -82,5 +83,7 @@ PhaseCurrent_s InlineCurrentSense::getPhaseCurrents()
     current.a = (adc_value[0] * ADC_REF_VOLTAGE / ADC_RESOLUTION - offset_ia) * gain_a;                       // amps
     current.b = (adc_value[1] * ADC_REF_VOLTAGE / ADC_RESOLUTION - offset_ib) * gain_b;                       // amps
     current.c = (!_isset(pinC)) ? 0 : (adc_value[2] * ADC_REF_VOLTAGE / ADC_RESOLUTION - offset_ic) * gain_c; // amps
+    // printf("Current sensor values: %d, %d, %d\n", adc_value[0], adc_value[1], adc_value[2]);
+    // printf("Current sensor currents: %.3f, %.3f, %.3f\n", current.a, current.b, current.c);
     return current;
 }

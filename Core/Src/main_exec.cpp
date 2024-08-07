@@ -6,7 +6,7 @@ MagneticSensorSPI sensor = MagneticSensorSPI(AS5048_SPI, SPI3_CS);
 
 // BLDC motor & driver instance
 BLDCMotor motor = BLDCMotor(14);
-BLDCDriver3PWM driver = BLDCDriver3PWM(DRV_en1, DRV_en2, DRV_en3);
+BLDCDriver3PWM driver = BLDCDriver3PWM(DRV_EN1, DRV_EN2, DRV_EN3);
 
 // current sensor
 InlineCurrentSense current_sense = InlineCurrentSense(0.01f, 50.0f);
@@ -16,6 +16,13 @@ float target = 2;
 
 void setup()
 {
+    Write_GPIO(LED_LD2, GPIO_PIN_SET);
+    // reset DRV8313 driver
+    Write_GPIO(DRV_nRESET, GPIO_PIN_RESET);
+    _delay(100);
+    Write_GPIO(DRV_nRESET, GPIO_PIN_SET);
+    Write_GPIO(DRV_nSLEEP, GPIO_PIN_SET);
+
     // initialise magnetic sensor hardware
     sensor.init(&hspi3);
     // link the motor to the sensor
@@ -28,15 +35,15 @@ void setup()
 
     // voltage control (default)
     // aligning voltage
-    motor.voltage_sensor_align = 5;
+    // motor.voltage_sensor_align = 5;
 
     // foc_current control
     // current sense init hardware
     current_sense.init(&hadc1);
     // link the current sense to the motor
-    // motor.linkCurrentSense(&current_sense);
+    motor.linkCurrentSense(&current_sense);
     // set torque mode: voltage, dc_current, foc_current
-    // motor.torque_controller = TorqueControlType::foc_current;
+    motor.torque_controller = TorqueControlType::foc_current;
 
     // choose FOC modulation (optional)
     motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
@@ -48,6 +55,7 @@ void setup()
     // align sensor and start FOC
     motor.initFOC();
     _delay(1000);
+    Write_GPIO(LED_LD2, GPIO_PIN_RESET);
 }
 
 void timerCallback()
