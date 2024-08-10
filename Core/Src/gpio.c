@@ -32,6 +32,9 @@ GPIO_Value LED_LD1 = {LD1_GPIO_Port, LD1_Pin};
 GPIO_Value LED_LD2 = {LD2_GPIO_Port, LD2_Pin};
 GPIO_Value LED_LD3 = {LD3_GPIO_Port, LD3_Pin};
 GPIO_Value SPI3_CS = {SPI3_CS_GPIO_Port, SPI3_CS_Pin};
+GPIO_Value HALL_A = {HALL_A_GPIO_Port, HALL_A_Pin};
+GPIO_Value HALL_B = {HALL_B_GPIO_Port, HALL_B_Pin};
+GPIO_Value HALL_C = {HALL_C_GPIO_Port, HALL_C_Pin};
 /* USER CODE END 0 */
 
 /*----------------------------------------------------------------------------*/
@@ -99,6 +102,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PGPin PGPin PGPin */
+  GPIO_InitStruct.Pin = HALL_C_Pin|HALL_B_Pin|HALL_A_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = USB_PowerSwitchOn_Pin;

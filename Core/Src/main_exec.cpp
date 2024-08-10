@@ -1,30 +1,29 @@
 #include "main_exec.h"
 #include "SimpleFOC.h"
 
-// magnetic sensor instance - SPI
-MagneticSensorSPI sensor = MagneticSensorSPI(AS5048_SPI, SPI3_CS);
+// hall sensor instance
+HallSensor sensor = HallSensor(HALL_A, HALL_B, HALL_C, pp);
 
 // BLDC motor & driver instance
-BLDCMotor motor = BLDCMotor(14);
+BLDCMotor motor = BLDCMotor(pp);
 BLDCDriver3PWM driver = BLDCDriver3PWM(DRV_EN1, DRV_EN2, DRV_EN3);
 
-// current sensor
-InlineCurrentSense current_sense = InlineCurrentSense(0.01f, 50.0f);
+// angle set point variable
+float target_angle = 0;
 
-// voltage or torque set point variable
-float target = 2;
+// gpio interrupt callback for hall sensors
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    sensor.handleCallback(GPIO_Pin);
+}
 
 void setup()
 {
     Write_GPIO(LED_LD2, GPIO_PIN_SET);
-    // reset DRV8313 driver
-    Write_GPIO(DRV_nRESET, GPIO_PIN_RESET);
-    _delay(100);
-    Write_GPIO(DRV_nRESET, GPIO_PIN_SET);
-    Write_GPIO(DRV_nSLEEP, GPIO_PIN_SET);
+    resetDriver();
 
-    // initialise magnetic sensor hardware
-    sensor.init(&hspi3);
+    // initialise hall sensor hardware
+    sensor.init();
     // link the motor to the sensor
     motor.linkSensor(&sensor);
 
@@ -33,22 +32,34 @@ void setup()
     driver.init();
     motor.linkDriver(&driver);
 
-    // voltage control (default)
-    // aligning voltage
-    // motor.voltage_sensor_align = 5;
+    // aligning voltage [V]
+    motor.voltage_sensor_align = 3;
+    // index search velocity [rad/s]
+    motor.velocity_index_search = 3;
 
-    // foc_current control
-    // current sense init hardware
-    current_sense.init(&hadc1);
-    // link the current sense to the motor
-    motor.linkCurrentSense(&current_sense);
-    // set torque mode: voltage, dc_current, foc_current
-    motor.torque_controller = TorqueControlType::foc_current;
-
-    // choose FOC modulation (optional)
-    motor.foc_modulation = FOCModulationType::SpaceVectorPWM;
     // set motion control loop to be used
-    motor.controller = MotionControlType::torque;
+    motor.controller = MotionControlType::angle;
+
+    // contoller configuration
+    // default parameters in defaults.h
+
+    // velocity PI controller parameters
+    motor.PID_velocity.P = 0.2f;
+    motor.PID_velocity.I = 2;
+    motor.PID_velocity.D = 0;
+    // default voltage_power_supply
+    motor.voltage_limit = 6;
+    // jerk control using voltage voltage ramp
+    // default value is 300 volts per sec  ~ 0.3V per millisecond
+    motor.PID_velocity.output_ramp = 1000;
+
+    // velocity low pass filtering time constant
+    motor.LPF_velocity.Tf = 0.01f;
+
+    // angle P controller
+    motor.P_angle.P = 20;
+    //  maximal velocity of the position control
+    motor.velocity_limit = 4;
 
     // initialize motor
     motor.init();
@@ -56,6 +67,15 @@ void setup()
     motor.initFOC();
     _delay(1000);
     Write_GPIO(LED_LD2, GPIO_PIN_RESET);
+}
+
+void resetDriver()
+{
+    // reset DRV8313 driver
+    Write_GPIO(DRV_nRESET, GPIO_PIN_RESET);
+    _delay(100);
+    Write_GPIO(DRV_nRESET, GPIO_PIN_SET);
+    Write_GPIO(DRV_nSLEEP, GPIO_PIN_SET);
 }
 
 void timerCallback()
@@ -70,5 +90,5 @@ void timerCallback()
     // velocity, position or voltage (defined in motor.controller)
     // this function can be run at much lower frequency than loopFOC() function
     // You can also use motor.move() and set the motor.target in the code
-    motor.move(target);
+    motor.move(target_angle);
 }

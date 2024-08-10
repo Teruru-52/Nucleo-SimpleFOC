@@ -8,10 +8,13 @@ extern "C"
 #include "main.h"
 
     void setup();
+    void resetDriver();
     void timerCallback();
 
 #ifdef __cplusplus
 };
 #endif
+
+const int pp = 14; // pole pairs
 
 #endif // MAIN_EXEC_H_

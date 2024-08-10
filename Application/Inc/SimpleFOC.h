@@ -98,6 +98,7 @@ void loop() {
 
 #include "BLDCMotor.h"
 #include "sensors/MagneticSensorSPI.h"
+#include "sensors/HallSensor.h"
 #include "drivers/BLDCDriver3PWM.h"
 #include "current_sense/InlineCurrentSense.h"
 #include "current_sense/LowsideCurrentSense.h"
