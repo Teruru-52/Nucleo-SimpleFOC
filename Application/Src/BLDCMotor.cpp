@@ -302,6 +302,7 @@ int BLDCMotor::alignSensor()
     _delay(200);
     // determine the direction the sensor moved
     float moved = fabs(mid_angle - end_angle);
+    printf("mid_angle: %f, end_angle: %f, moved: %f\n", mid_angle, end_angle, moved);
     if (moved < MIN_ANGLE_DETECT_MOVEMENT)
     { // minimum angle to detect movement
       // SIMPLEFOC_DEBUG("MOT: Failed to notice movement");
@@ -483,6 +484,11 @@ void BLDCMotor::loopFOC()
 
   // set the phase voltage - FOC heart function :)
   setPhaseVoltage(voltage.q, voltage.d, electrical_angle);
+  // setPhaseVoltage(2.0, 0, electrical_angle);
+  static int cnt = 0;
+  if (cnt == 0)
+    printf("MOT: Uq: %f, Ud: %f, angle: %f\n", voltage.q, voltage.d, electrical_angle);
+  cnt = (cnt + 1) % 1000;
 }
 
 // Iterative function running outer loop of the FOC algorithm
@@ -554,6 +560,7 @@ void BLDCMotor::move(float new_target)
     shaft_angle_sp = target;
     // calculate velocity set point
     shaft_velocity_sp = feed_forward_velocity + P_angle(shaft_angle_sp - shaft_angle);
+    // printf("shaft_angle_sp: %f, shaft_angle: %f, shaft_velocity_sp: %f, shaft_velocity: %f\n", shaft_angle_sp, shaft_angle, shaft_velocity_sp, shaft_velocity);
     shaft_velocity_sp = _constrain(shaft_velocity_sp, -velocity_limit, velocity_limit);
     // calculate the torque command - sensor precision: this calculation is ok, but based on bad value from previous calculation
     current_sp = PID_velocity(shaft_velocity_sp - shaft_velocity); // if voltage torque control

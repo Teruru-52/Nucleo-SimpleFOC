@@ -31,6 +31,10 @@ void HallSensor::handleCallback(uint16_t GPIO_Pin)
   if (GPIO_Pin == pinC.GPIO_PIN_x)
     C_active = Read_GPIO(pinC);
   updateState();
+  // printf("HallSensor::handleCallback\n");
+  // Write_GPIO(DRV_EN1, A_active);
+  // Write_GPIO(DRV_EN2, B_active);
+  // Write_GPIO(DRV_EN3, C_active);
 }
 
 /**

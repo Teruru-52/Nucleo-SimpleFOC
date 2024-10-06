@@ -15,6 +15,6 @@ extern "C"
 };
 #endif
 
-const int pp = 14; // pole pairs
+const int pp = 4; // pole pairs
 
 #endif // MAIN_EXEC_H_
